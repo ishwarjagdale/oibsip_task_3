@@ -156,8 +156,10 @@ public class ATMMachine {
         System.out.println("Transaction Date\tValue Date\tTransaction Amount\t\tBalance Amount");
         if(!resultSet.next()){
             System.out.println("No Transactions!");
-            this.scanner.nextLine();
+        } else {
+            System.out.printf("%16s\t%10s\t%18.2f\t\t%14.2f", resultSet.getString("transaction_date"), resultSet.getString("value_date"), resultSet.getBigDecimal("transaction_amount"), resultSet.getBigDecimal("balance_amount"));
         }
+        this.scanner.nextLine();
         while(resultSet.next() && this.scanner.nextLine().equals("")) {
             System.out.printf("%16s\t%10s\t%18.2f\t\t%14.2f", resultSet.getString("transaction_date"), resultSet.getString("value_date"), resultSet.getBigDecimal("transaction_amount"), resultSet.getBigDecimal("balance_amount"));
         }
