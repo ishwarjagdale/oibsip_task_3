@@ -154,6 +154,10 @@ public class ATMMachine {
         System.out.println("\tTransaction History: [Enter q to quit | Press return key to move further]");
         System.out.println("|----------------------------------------------------------------------------");
         System.out.println("Transaction Date\tValue Date\tTransaction Amount\t\tBalance Amount");
+        if(!resultSet.next()){
+            System.out.println("No Transactions!");
+            this.scanner.nextLine();
+        }
         while(resultSet.next() && this.scanner.nextLine().equals("")) {
             System.out.printf("%16s\t%10s\t%18.2f\t\t%14.2f", resultSet.getString("transaction_date"), resultSet.getString("value_date"), resultSet.getBigDecimal("transaction_amount"), resultSet.getBigDecimal("balance_amount"));
         }
@@ -200,17 +204,13 @@ public class ATMMachine {
         BigDecimal amount = this.getBDecInput();
         Statement statement = this.connection.createStatement();
         ResultSet resultSet = statement.executeQuery("SELECT balance_amount FROM transactions WHERE account_id = " + this.getAccount_id() + " AND id = (SELECT max(id) FROM transactions WHERE account_id = " + this.getAccount_id() + ");");
-        if(resultSet.next()) {
-            BigDecimal balance_amount = resultSet.getBigDecimal("balance_amount");
-            balance_amount = balance_amount.add(amount);
-            int isSuccessful = statement.executeUpdate("INSERT INTO transactions (account_id, transaction_date, value_date, transaction_amount, balance_amount)" +
-                    "VALUES (" + this.getAccount_id() + ", " + "NOW(), NOW(), +" + amount + ", " + balance_amount + ");"
-            );
-            if(isSuccessful > 0) {
-                System.out.println("Amount deposited successfully!\n");
-            }
-        } else {
-            System.out.println("Transaction Failed!\n");
+        BigDecimal balance_amount = resultSet.next() ? resultSet.getBigDecimal("balance_amount") : BigDecimal.valueOf(0);
+        balance_amount = balance_amount.add(amount);
+        int isSuccessful = statement.executeUpdate("INSERT INTO transactions (account_id, transaction_date, value_date, transaction_amount, balance_amount)" +
+                "VALUES (" + this.getAccount_id() + ", " + "NOW(), NOW(), +" + amount + ", " + balance_amount + ");"
+        );
+        if(isSuccessful > 0) {
+            System.out.println("Amount deposited successfully!\n");
         }
         statement.close();
         this.scanner.nextLine();
